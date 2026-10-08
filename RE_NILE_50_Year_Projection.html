@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RE-NILE GSS — 50-Year Economic &amp; Environmental Projection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --primary: #814BE7;
+      --primary-light: #C17BFD;
+      --bg: #F0F4F8;
+      --card-bg: #FFFFFF;
+      --text: #1A2340;
+      --text-muted: #5E6A85;
+      --border: #D8E0EC;
+      --success: #22C55E;
+      --danger: #EF4444;
+      --land-color: #16A34A;
+      --land-light: #4ADE80;
+      --water-color: #1D6FD8;
+      --water-light: #60A5FA;
+      --econ-color: #B45309;
+      --econ-light: #FCD34D;
+      --radius: 14px;
+      --shadow: 0 0 0 1px var(--border), 0 2px 10px rgba(10,20,60,0.06);
+      --shadow-hover: 0 0 0 1px var(--border), 0 6px 24px rgba(10,20,60,0.13);
+      --font: 'Open Sans', system-ui, -apple-system, sans-serif;
+    }
+    :root.dark {
+      --bg: #111827;
+      --card-bg: #1E2A3A;
+      --text: #E8EFF8;
+      --text-muted: #8CA0B8;
+      --border: #2D3D52;
+      --land-color: #4ADE80;
+      --land-light: #86EFAC;
+      --water-color: #60A5FA;
+      --water-light: #93C5FD;
+      --econ-color: #FBBF24;
+      --econ-light: #FDE68A;
+      --shadow: 0 0 0 1px var(--border), 0 2px 10px rgba(0,0,0,0.25);
+      --shadow-hover: 0 0 0 1px var(--border), 0 6px 24px rgba(0,0,0,0.40);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not(.light) {
+        --bg: #111827;
+        --card-bg: #1E2A3A;
+        --text: #E8EFF8;
+        --text-muted: #8CA0B8;
+        --border: #2D3D52;
+        --land-color: #4ADE80;
+        --land-light: #86EFAC;
+        --water-color: #60A5FA;
+        --water-light: #93C5FD;
+        --econ-color: #FBBF24;
+        --econ-light: #FDE68A;
+        --shadow: 0 0 0 1px var(--border), 0 2px 10px rgba(0,0,0,0.25);
+        --shadow-hover: 0 0 0 1px var(--border), 0 6px 24px rgba(0,0,0,0.40);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 70vh;
+      background: radial-gradient(ellipse 80% 55% at 50% -5%,
+        rgba(22,163,74,0.07) 0%,
+        rgba(29,111,216,0.06) 40%,
+        rgba(180,83,9,0.04) 70%,
+        transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ---- HERO BANNER ---- */
+    .hero-banner {
+      background: linear-gradient(135deg, #0D3320 0%, #0C2340 45%, #1A0A30 100%);
+      border-radius: 18px;
+      padding: 40px 48px 36px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+    }
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 100% 50%, rgba(22,163,74,0.18), transparent 60%),
+        radial-gradient(ellipse 50% 60% at 0% 50%, rgba(29,111,216,0.15), transparent 60%),
+        radial-gradient(ellipse 40% 50% at 50% 0%, rgba(251,191,36,0.10), transparent 60%);
+      pointer-events: none;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #16A34A, #1D6FD8, #FBBF24, #16A34A);
+      background-size: 200% 100%;
+      animation: shimmer 4s linear infinite;
+    }
+    @keyframes shimmer { 0%{background-position:0% 0%} 100%{background-position:200% 0%} }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 10px;
+    }
+    .hero-logo { height: 32px; width: auto; margin-bottom: 4px; filter: brightness(1.2); }
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4ADE80;
+      background: rgba(22,163,74,0.15);
+      border: 1px solid rgba(74,222,128,0.3);
+      border-radius: 20px;
+      padding: 3px 14px;
+    }
+    .hero-title {
+      font-size: 2.1rem;
+      font-weight: 700;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #FFFFFF 0%, #A7F3D0 35%, #BAE6FD 65%, #FDE68A 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-subtitle {
+      font-size: 0.92rem;
+      color: rgba(200,220,255,0.75);
+      max-width: 680px;
+      line-height: 1.65;
+    }
+    .hero-badge-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 6px;
+    }
+    .hero-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid;
+      backdrop-filter: blur(4px);
+    }
+    .hero-badge.green { color: #4ADE80; border-color: rgba(74,222,128,0.35); background: rgba(22,163,74,0.12); }
+    .hero-badge.blue  { color: #60A5FA; border-color: rgba(96,165,250,0.35); background: rgba(29,111,216,0.12); }
+    .hero-badge.gold  { color: #FCD34D; border-color: rgba(252,211,77,0.35); background: rgba(180,83,9,0.12); }
+    .hero-badge .dot  { width: 7px; height: 7px; border-radius: 50%; }
+    .hero-badge.green .dot { background: #4ADE80; box-shadow: 0 0 6px #4ADE80; }
+    .hero-badge.blue  .dot { background: #60A5FA; box-shadow: 0 0 6px #60A5FA; }
+    .hero-badge.gold  .dot { background: #FCD34D; box-shadow: 0 0 6px #FCD34D; }
+    .theme-toggle {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: rgba(200,220,255,0.8);
+      font-size: 1rem;
+      line-height: 1;
+      transition: background 0.2s ease;
+      display: flex; align-items: center; gap: 4px;
+      z-index: 2;
+    }
+    .theme-toggle:hover { background: rgba(255,255,255,0.18); }
+    .theme-toggle .icon-sun, .theme-toggle .icon-moon { display: none; }
+    .theme-toggle .icon-sun { display: inline; }
+    :root.dark .theme-toggle .icon-sun { display: none; }
+    :root.dark .theme-toggle .icon-moon { display: inline; }
+    @media (prefers-color-scheme: dark) {
+      :root:not(.light) .theme-toggle .icon-sun { display: none; }
+      :root:not(.light) .theme-toggle .icon-moon { display: inline; }
+    }
+
+    /* ---- LAYOUT ---- */
+    .dashboard { max-width: 1400px; margin: 0 auto; padding: 24px; position: relative; z-index: 1; }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; }
+    .col-2  { grid-column: span 2; }
+    .col-3  { grid-column: span 3; }
+    .col-4  { grid-column: span 4; }
+    .col-6  { grid-column: span 6; }
+    .col-8  { grid-column: span 8; }
+    .col-12 { grid-column: span 12; }
+    @media (max-width: 767.98px) {
+      .col-2, .col-3, .col-4, .col-6, .col-8, .col-12 { grid-column: span 12; }
+      .grid { gap: 12px; }
+      .dashboard { padding: 14px; }
+      .hero-banner { padding: 28px 20px 24px; }
+      .hero-title { font-size: 1.45rem; }
+      .kpi-value { font-size: 1.6rem !important; }
+    }
+
+    /* ---- CARDS ---- */
+    .card, .kpi-card, .chart-card, .text-card, .table-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .card:hover, .kpi-card:hover, .chart-card:hover, .text-card:hover, .table-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    .card::before, .kpi-card::before, .chart-card::before, .text-card::before, .table-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+      opacity: 0.5;
+    }
+    /* Thematic top-line overrides */
+    .kpi-land::before  { background: linear-gradient(90deg, transparent, var(--land-light), transparent); opacity: 0.8; }
+    .kpi-water::before { background: linear-gradient(90deg, transparent, var(--water-light), transparent); opacity: 0.8; }
+    .kpi-econ::before  { background: linear-gradient(90deg, transparent, var(--econ-light), transparent); opacity: 0.8; }
+    .kpi-growth::before { background: linear-gradient(90deg, transparent, #C17BFD, transparent); opacity: 0.8; }
+
+    /* ---- KPI CARDS ---- */
+    .kpi-card { padding: 22px 24px; }
+    .kpi-icon { font-size: 1.4rem; margin-bottom: 8px; display: block; }
+    .kpi-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+    .kpi-value { font-size: 1.85rem; font-weight: 700; color: var(--text); line-height: 1.15; }
+    .kpi-subvalue { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+    .kpi-delta {
+      display: inline-block;
+      font-size: 0.72rem; font-weight: 700;
+      margin-top: 8px; padding: 3px 9px;
+      border-radius: 20px;
+    }
+    .kpi-delta.positive { color: var(--success); background: rgba(34,197,94,0.12); }
+    .kpi-delta.land  { color: var(--land-color);  background: rgba(22,163,74,0.12); }
+    .kpi-delta.water { color: var(--water-color); background: rgba(29,111,216,0.12); }
+    .kpi-delta.econ  { color: var(--econ-color);  background: rgba(180,83,9,0.12); }
+    .kpi-glow-land  { box-shadow: var(--shadow), 0 0 24px rgba(22,163,74,0.08); }
+    .kpi-glow-water { box-shadow: var(--shadow), 0 0 24px rgba(29,111,216,0.08); }
+    .kpi-glow-econ  { box-shadow: var(--shadow), 0 0 24px rgba(180,83,9,0.08); }
+    .kpi-glow-purple{ box-shadow: var(--shadow), 0 0 24px rgba(129,75,231,0.08); }
+    :root.dark .kpi-glow-land  { box-shadow: var(--shadow), 0 0 28px rgba(74,222,128,0.12); }
+    :root.dark .kpi-glow-water { box-shadow: var(--shadow), 0 0 28px rgba(96,165,250,0.12); }
+    :root.dark .kpi-glow-econ  { box-shadow: var(--shadow), 0 0 28px rgba(251,191,36,0.12); }
+    :root.dark .kpi-glow-purple{ box-shadow: var(--shadow), 0 0 28px rgba(193,123,253,0.12); }
+
+    /* ---- CHART ---- */
+    .card-title {
+      font-size: 1rem; font-weight: 700; color: var(--text);
+      margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
+    }
+    .card-title .ct-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .card-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 14px; }
+    .chart-container { min-height: 340px; width: 100%; }
+    .chart-container.tall { min-height: 420px; }
+
+    /* ---- TEXT CARD ---- */
+    .text-card p { font-size: 0.875rem; color: var(--text); margin-bottom: 8px; line-height: 1.7; }
+    .text-card p:last-child { margin-bottom: 0; }
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 10px;
+    }
+    @media (max-width: 767.98px) { .insight-grid { grid-template-columns: 1fr; } }
+    .insight-item {
+      background: rgba(129,75,231,0.05);
+      border: 1px solid rgba(129,75,231,0.12);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    :root.dark .insight-item { background: rgba(129,75,231,0.08); border-color: rgba(193,123,253,0.18); }
+    .insight-item.green-tint { background: rgba(22,163,74,0.05); border-color: rgba(22,163,74,0.15); }
+    .insight-item.blue-tint  { background: rgba(29,111,216,0.05); border-color: rgba(29,111,216,0.15); }
+    .insight-item.gold-tint  { background: rgba(180,83,9,0.05); border-color: rgba(180,83,9,0.15); }
+    :root.dark .insight-item.green-tint { background: rgba(74,222,128,0.07); border-color: rgba(74,222,128,0.20); }
+    :root.dark .insight-item.blue-tint  { background: rgba(96,165,250,0.07); border-color: rgba(96,165,250,0.20); }
+    :root.dark .insight-item.gold-tint  { background: rgba(251,191,36,0.07); border-color: rgba(251,191,36,0.20); }
+    .insight-item .iicon { font-size: 1.3rem; margin-bottom: 6px; }
+    .insight-item .ititle { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 4px; }
+    .insight-item .ibody { font-size: 0.82rem; color: var(--text); line-height: 1.55; }
+
+    /* ---- TABLE ---- */
+    .table-card { overflow-x: auto; }
+    .table-card table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .table-card th {
+      text-align: left; padding: 10px 14px;
+      border-bottom: 2px solid var(--border);
+      font-weight: 700; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--text-muted); white-space: nowrap;
+    }
+    .table-card td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .table-card tr:last-child td { border-bottom: none; }
+    .table-card tbody tr:nth-child(even) td { background: rgba(129,75,231,0.025); }
+    .table-card tbody tr:hover td { background: rgba(129,75,231,0.06); }
+    .badge-milestone {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 12px;
+    }
+    .badge-y10  { color: #16A34A; background: rgba(22,163,74,0.12); }
+    .badge-y20  { color: #1D6FD8; background: rgba(29,111,216,0.12); }
+    .badge-y30  { color: #7C3AED; background: rgba(124,58,237,0.12); }
+    .badge-y40  { color: #B45309; background: rgba(180,83,9,0.12); }
+    .badge-y50  { color: #DC2626; background: rgba(220,38,38,0.12); }
+    .num-green { color: #16A34A; font-weight: 700; }
+    .num-blue  { color: #1D6FD8; font-weight: 700; }
+    .num-gold  { color: #B45309; font-weight: 700; }
+    :root.dark .num-green { color: #4ADE80; }
+    :root.dark .num-blue  { color: #60A5FA; }
+    :root.dark .num-gold  { color: #FCD34D; }
+
+    /* ---- SECTION LABEL ---- */
+    .section-label {
+      grid-column: span 12;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: -8px;
+      padding-left: 2px;
+    }
+    .section-label::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+
+    /* ---- FOOTER ---- */
+    .footer {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: 40px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .footer .logo-sm { height: 18px; width: auto; }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+
+  <!-- ════════════ HERO HEADER ════════════ -->
+  <div class="hero-banner">
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+      <span class="icon-sun">&#9788;</span>
+      <span class="icon-moon">&#9790;</span>
+    </button>
+    <div class="hero-inner">
+      <img class="hero-logo" src="https://www.energent.ai/images/logos/svg/energent-logo.svg" alt="Energent logo">
+      <span class="hero-eyebrow">Compound Growth Model · 50-Year Horizon</span>
+      <h1 class="hero-title">RE-NILE GSS — 50-Year Economic &amp; Environmental Projection</h1>
+      <p class="hero-subtitle">
+        A half-century exponential growth roadmap for the Renewable Nile Green Sustainability System (RE-NILE GSS),
+        illustrating the transformative compounding impact on reclaimed land, water conservation, and national economic value.
+      </p>
+      <div class="hero-badge-row">
+        <span class="hero-badge green"><span class="dot">&#8203;</span>Reclaimed Land: 167K Acres by Year 50</span>
+        <span class="hero-badge blue"><span class="dot">&#8203;</span>Water Savings: 542 MCM by Year 50</span>
+        <span class="hero-badge gold"><span class="dot">&#8203;</span>Economic Impact: $1.96B by Year 50</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ KPI ROW ════════════ -->
+  <div class="grid">
+    <div class="section-label">Peak Year 50 Projections &amp; Growth Multiples</div>
+
+    <!-- Land KPI -->
+    <div class="col-3">
+      <div class="kpi-card kpi-land kpi-glow-land">
+        <span class="kpi-icon">🌿</span>
+        <div class="kpi-label">Reclaimed Land (Year 50)</div>
+        <div class="kpi-value" style="color: var(--land-color);">167,070</div>
+        <div class="kpi-subvalue">Acres of land reclaimed</div>
+        <span class="kpi-delta land">×1,440 vs Year 1</span>
+      </div>
+    </div>
+
+    <!-- Water KPI -->
+    <div class="col-3">
+      <div class="kpi-card kpi-water kpi-glow-water">
+        <span class="kpi-icon">💧</span>
+        <div class="kpi-label">Water Savings (Year 50)</div>
+        <div class="kpi-value" style="color: var(--water-color);">541.8</div>
+        <div class="kpi-subvalue">Million Cubic Metres (MCM)</div>
+        <span class="kpi-delta water">×942 vs Year 1</span>
+      </div>
+    </div>
+
+    <!-- Economic KPI -->
+    <div class="col-3">
+      <div class="kpi-card kpi-econ kpi-glow-econ">
+        <span class="kpi-icon">💰</span>
+        <div class="kpi-label">Economic Impact (Year 50)</div>
+        <div class="kpi-value" style="color: var(--econ-color);">$1.96B</div>
+        <div class="kpi-subvalue">USD Economic Value</div>
+        <span class="kpi-delta econ">×3,329 vs Year 1</span>
+      </div>
+    </div>
+
+    <!-- Compound Growth KPI -->
+    <div class="col-3">
+      <div class="kpi-card kpi-growth kpi-glow-purple">
+        <span class="kpi-icon">📈</span>
+        <div class="kpi-label">Annual Compound Rate</div>
+        <div class="kpi-value" style="color: var(--primary);">~15%</div>
+        <div class="kpi-subvalue">Avg. CAGR across all metrics</div>
+        <span class="kpi-delta positive">Exponential Model</span>
+      </div>
+    </div>
+
+    <!-- ════════════ MASTER CHART: All 3 Metrics Normalised ════════════ -->
+    <div class="section-label">Exponential Growth Trajectory — Combined View (Normalized Index)</div>
+    <div class="col-12">
+      <div class="chart-card">
+        <div class="card-title">
+          <span class="ct-dot" style="background:var(--land-color)">&#8203;</span>
+          All Three Metrics — 50-Year Exponential Growth Index (Year 1 = 1.0)
+        </div>
+        <div class="card-subtitle">Normalized to Year 1 baseline so the compound growth curves are directly comparable across metrics</div>
+        <div class="chart-container tall" id="chart-index"></div>
+      </div>
+    </div>
+
+    <!-- ════════════ LAND CHART ════════════ -->
+    <div class="section-label">Individual Metric Deep-Dives</div>
+    <div class="col-12">
+      <div class="chart-card">
+        <div class="card-title">
+          <span class="ct-dot" style="background:var(--land-color)">&#8203;</span>
+          Reclaimed Land Expansion — 50-Year Area Chart
+        </div>
+        <div class="card-subtitle">Acres of desert/degraded land reclaimed annually through RE-NILE GSS interventions</div>
+        <div class="chart-container" id="chart-land"></div>
+      </div>
+    </div>
+
+    <!-- ════════════ WATER CHART ════════════ -->
+    <div class="col-12">
+      <div class="chart-card">
+        <div class="card-title">
+          <span class="ct-dot" style="background:var(--water-color)">&#8203;</span>
+          Water Savings Trajectory — 50-Year Area Chart
+        </div>
+        <div class="card-subtitle">Cumulative annual water conservation in Million Cubic Metres (MCM)</div>
+        <div class="chart-container" id="chart-water"></div>
+      </div>
+    </div>
+
+    <!-- ════════════ ECONOMIC CHART ════════════ -->
+    <div class="col-12">
+      <div class="chart-card">
+        <div class="card-title">
+          <span class="ct-dot" style="background:var(--econ-color)">&#8203;</span>
+          Economic Impact Projection — 50-Year Area Chart
+        </div>
+        <div class="card-subtitle">Annual economic value generated (USD Millions) — reaches near $2 Billion by Year 50</div>
+        <div class="chart-container" id="chart-econ"></div>
+      </div>
+    </div>
+
+    <!-- ════════════ MILESTONE TABLE ════════════ -->
+    <div class="section-label">Decade-by-Decade Milestones</div>
+    <div class="col-12">
+      <div class="table-card">
+        <div class="card-title">&#127942; Key Milestone Snapshots — Every 5 Years</div>
+        <div class="card-subtitle" style="font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;">
+          Projected values at selected years to illustrate the pace of compounding scale
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Milestone</th>
+              <th>Reclaimed Land (Acres)</th>
+              <th>Water Savings (MCM)</th>
+              <th>Economic Impact (USD M)</th>
+              <th>Land Growth (×Y1)</th>
+              <th>Economic Growth (×Y1)</th>
+            </tr>
+          </thead>
+          <tbody id="milestone-table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════════════ INSIGHTS ════════════ -->
+    <div class="col-12">
+      <div class="text-card">
+        <div class="card-title">&#128161; Key Insights — The Power of Exponential Compounding</div>
+        <div class="insight-grid">
+          <div class="insight-item green-tint">
+            <div class="iicon">🌿</div>
+            <div class="ititle">Land Reclamation</div>
+            <div class="ibody">Starting from just 116 acres in Year 1, RE-NILE GSS reclaims land at a compounding rate that delivers over <strong>167,000 acres</strong> by Year 50 — a <strong>1,440× multiplication</strong>. The inflection point accelerates sharply after Year 30.</div>
+          </div>
+          <div class="insight-item blue-tint">
+            <div class="iicon">💧</div>
+            <div class="ititle">Water Conservation</div>
+            <div class="ibody">Water savings scale from 0.58 MCM to <strong>542 MCM</strong> — a <strong>942× increase</strong>. This trajectory represents a critical buffer against regional water scarcity, with savings exceeding 100 MCM after Year 44.</div>
+          </div>
+          <div class="insight-item gold-tint">
+            <div class="iicon">💰</div>
+            <div class="ititle">Economic Value</div>
+            <div class="ibody">From $0.59M in Year 1, economic impact rockets to <strong>$1.96 Billion</strong> by Year 50 — a <strong>3,329× return</strong>. The economic curve is the steepest of all three, reflecting the multiplicative nature of agri-environmental value creation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+  <footer class="footer">
+    <img class="logo-sm" src="https://www.energent.ai/images/logos/svg/energent-logo.svg" alt="Energent logo">
+    <a href="https://www.energent.ai" target="_blank" rel="noopener noreferrer"
+       style="color: var(--text-muted); text-decoration: none; transition: color 0.2s ease;"
+       onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-muted)'">
+      Powered by energent.ai
+    </a>
+    &nbsp;·&nbsp; RE-NILE GSS 50-Year Exponential Projection &nbsp;·&nbsp; Compound Growth Model
+  </footer>
+</div><!-- /dashboard -->
+
+<script>
+// ─────────────────────────────────────────────
+// DATA (from renile_50yr_projection.csv)
+// ─────────────────────────────────────────────
+const DATA = [
+  {year:1,  land:115.99999999999999,  water:0.575,             econ:0.59},
+  {year:2,  land:134.55999999999997,  water:0.6612499999999999,econ:0.6961999999999999},
+  {year:3,  land:156.08959999999996,  water:0.7604374999999999,econ:0.8215159999999999},
+  {year:4,  land:181.06393599999996,  water:0.8745031249999997,econ:0.9693888799999998},
+  {year:5,  land:210.03416575999992,  water:1.0056785937499997,econ:1.1438788783999998},
+  {year:6,  land:243.63963228159992,  water:1.1565303828124995,econ:1.3497770765119996},
+  {year:7,  land:282.6219734466559,   water:1.3300099402343744,econ:1.5927369502841593},
+  {year:8,  land:327.84148919812077,  water:1.5295114312695304,econ:1.879429601335308},
+  {year:9,  land:380.2961274698201,   water:1.7589381459599598,econ:2.2177269295756634},
+  {year:10, land:441.14350786499125,  water:2.0227788678539533,econ:2.6169177768992826},
+  {year:11, land:511.7264691233898,   water:2.326195698032046, econ:3.0879629767411534},
+  {year:12, land:593.6027041831321,   water:2.675125052736853, econ:3.6437963125545605},
+  {year:13, land:688.5791368524332,   water:3.0763938106473807,econ:4.299679648814381},
+  {year:14, land:798.7517987488225,   water:3.5378528822444877,econ:5.07362198560097},
+  {year:15, land:926.5520865486341,   water:4.068530814581161, econ:5.986873943009144},
+  {year:16, land:1074.8004203964153,  water:4.678810436768334, econ:7.06451125275079},
+  {year:17, land:1246.7684876598419,  water:5.380632002283584, econ:8.336123278245932},
+  {year:18, land:1446.2514456854165,  water:6.187726802626121, econ:9.836625468330197},
+  {year:19, land:1677.6516769950827,  water:7.115885823020038, econ:11.607218052629634},
+  {year:20, land:1946.075945314296,   water:8.183268696473045, econ:13.696517302102967},
+  {year:21, land:2257.4480965645835,  water:9.410759000944,    econ:16.1618904164815},
+  {year:22, land:2618.6397920149166,  water:10.822372851085598,econ:19.07103069144817},
+  {year:23, land:3037.622158737303,   water:12.445728778748437,econ:22.503816215908838},
+  {year:24, land:3523.641704135271,   water:14.312588095560702,econ:26.55450313477243},
+  {year:25, land:4087.424376796914,   water:16.459476309894807,econ:31.334313699031462},
+  {year:26, land:4741.412277084421,   water:18.928397756379027,econ:36.97449016485712},
+  {year:27, land:5500.038241417927,   water:21.767657419835878,econ:43.6298983945314},
+  {year:28, land:6380.044360044795,   water:25.03280603281126, econ:51.48328010554705},
+  {year:29, land:7400.851457651962,   water:28.787726937732945,econ:60.75027052454552},
+  {year:30, land:8584.987690876274,   water:33.105885978392884,econ:71.68531921896371},
+  {year:31, land:9958.585721416477,   water:38.07176887515181, econ:84.58867667837717},
+  {year:32, land:11551.959436843114,  water:43.78253420642458, econ:99.81463848048506},
+  {year:33, land:13400.27294673801,   water:50.34991433738826, econ:117.78127340697236},
+  {year:34, land:15544.316618216093,  water:57.9024014879965,  econ:138.98190262022737},
+  {year:35, land:18031.407277130667,  water:66.58776171119597, econ:163.9986450918683},
+  {year:36, land:20916.43244147157,   water:76.57592596787536, econ:193.51840120840458},
+  {year:37, land:24263.06163210702,   water:88.06231486305666, econ:228.3517134259174},
+  {year:38, land:28145.15149324414,   water:101.27166209251514,econ:269.45502184258254},
+  {year:39, land:32648.375732163204,  water:116.4624114063924, econ:317.95692577424734},
+  {year:40, land:37872.11584930931,   water:133.93177311735127,econ:375.18917241361186},
+  {year:41, land:43931.654385198795,  water:154.02153908495393,econ:442.72322344806196},
+  {year:42, land:50960.7190868306,    water:177.12476994769702,econ:522.413403668713},
+  {year:43, land:59114.4341407235,    water:203.69348543985154,econ:616.4478163290814},
+  {year:44, land:68572.74360323924,   water:234.24750825582927,econ:727.408423268316},
+  {year:45, land:79544.38257975751,   water:269.3846344942036, econ:858.3419394566129},
+  {year:46, land:92271.48379251872,   water:309.79232966833416,econ:1012.8434885588032},
+  {year:47, land:107034.9211993217,   water:356.26117911858427,econ:1195.1553164993877},
+  {year:48, land:124160.50859121318,  water:409.70035598637185,econ:1410.2832734692774},
+  {year:49, land:144026.18996580728,  water:471.1554093843276, econ:1664.1342626937471},
+  {year:50, land:167070.38036033642,  water:541.8287207919767, econ:1963.6784299786216}
+];
+
+const YEARS = DATA.map(d => d.year);
+const LAND  = DATA.map(d => d.land);
+const WATER = DATA.map(d => d.water);
+const ECON  = DATA.map(d => d.econ);
+
+// ─────────────────────────────────────────────
+// THEME HELPERS
+// ─────────────────────────────────────────────
+function getEffectiveDark() {
+  const root = document.documentElement;
+  if (root.classList.contains('dark')) return true;
+  if (root.classList.contains('light')) return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function toggleTheme() {
+  const root = document.documentElement;
+  const dark = getEffectiveDark();
+  root.classList.remove('dark', 'light');
+  root.classList.add(dark ? 'light' : 'dark');
+  rebuildCharts();
+}
+
+const COLORS = ['#814BE7','#6851FF','#E73B4F','#D4A740','#3FA881'];
+const chartRegistry = [];
+
+function getDefaultLayout() {
+  const dark = getEffectiveDark();
+  return {
+    font: { family: 'Open Sans, system-ui, sans-serif', color: dark ? '#E8EFF8' : '#1A2340' },
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    autosize: true,
+    margin: { l: 60, r: 40, t: 50, b: 60 },
+    xaxis: { gridcolor: dark ? '#2D3D52' : '#E2E8F0', automargin: true, zerolinecolor: dark ? '#3A4860' : '#CBD5E1' },
+    yaxis: { gridcolor: dark ? '#2D3D52' : '#E2E8F0', automargin: true, zerolinecolor: dark ? '#3A4860' : '#CBD5E1' },
+    colorway: COLORS,
+    legend: { font: { family: 'Open Sans, system-ui, sans-serif', size: 12 } },
+    hoverlabel: {
+      font: { family: 'Open Sans, system-ui, sans-serif', size: 13 },
+      bgcolor: dark ? '#1E2A3A' : '#FFFFFF',
+      bordercolor: dark ? '#3A4860' : '#D8E0EC',
+      namelength: -1,
+    },
+  };
+}
+
+const NESTED_LAYOUT_KEYS = ['xaxis','yaxis','yaxis2','yaxis3','margin','legend','font','hoverlabel'];
+function mergeLayouts(base, overrides) {
+  const merged = { ...base, ...overrides };
+  for (const key of NESTED_LAYOUT_KEYS) {
+    if (base[key] && overrides[key] && typeof base[key] === 'object' && typeof overrides[key] === 'object') {
+      merged[key] = { ...base[key], ...overrides[key] };
+    }
+  }
+  return merged;
+}
+
+function createChart(id, traces, layoutOverrides) {
+  layoutOverrides = layoutOverrides || {};
+  chartRegistry.push({ id, traces, layoutOverrides });
+  Plotly.newPlot(id, traces,
+    mergeLayouts(getDefaultLayout(), layoutOverrides),
+    { responsive: true, displayModeBar: false }
+  );
+}
+
+function rebuildCharts() {
+  chartRegistry.forEach(function(c) {
+    Plotly.react(c.id, c.traces,
+      mergeLayouts(getDefaultLayout(), c.layoutOverrides),
+      { responsive: true, displayModeBar: false }
+    );
+  });
+}
+
+// ─────────────────────────────────────────────
+// NUMBER FORMATTERS
+// ─────────────────────────────────────────────
+function fmtAcres(n) {
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K ac';
+  return n.toFixed(0) + ' ac';
+}
+function fmtMCM(n) {
+  if (n >= 100) return n.toFixed(1) + ' MCM';
+  return n.toFixed(2) + ' MCM';
+}
+function fmtEcon(n) {
+  if (n >= 1000) return '$' + (n/1000).toFixed(2) + 'B';
+  if (n >= 1) return '$' + n.toFixed(1) + 'M';
+  return '$' + n.toFixed(2) + 'M';
+}
+function fmtAcresFull(n) {
+  return n.toLocaleString('en-US', {maximumFractionDigits: 0}) + ' acres';
+}
+function fmtEconFull(n) {
+  if (n >= 1000) return '$' + (n/1000).toFixed(3) + 'B';
+  return '$' + n.toFixed(2) + 'M';
+}
+
+// ─────────────────────────────────────────────
+// CHART 1: NORMALIZED INDEX
+// ─────────────────────────────────────────────
+(function() {
+  const base_land  = DATA[0].land;
+  const base_water = DATA[0].water;
+  const base_econ  = DATA[0].econ;
+
+  const idx_land  = DATA.map(d => d.land  / base_land);
+  const idx_water = DATA.map(d => d.water / base_water);
+  const idx_econ  = DATA.map(d => d.econ  / base_econ);
+
+  const hover_land  = DATA.map(function(d,i) {
+    return '<b>Year ' + d.year + '</b><br>Land Index: <b>' + idx_land[i].toFixed(0) + '×</b><br>Actual: ' + fmtAcresFull(d.land);
+  });
+  const hover_water = DATA.map(function(d,i) {
+    return '<b>Year ' + d.year + '</b><br>Water Index: <b>' + idx_water[i].toFixed(0) + '×</b><br>Actual: ' + d.water.toFixed(2) + ' MCM';
+  });
+  const hover_econ  = DATA.map(function(d,i) {
+    return '<b>Year ' + d.year + '</b><br>Econ Index: <b>' + idx_econ[i].toFixed(0) + '×</b><br>Actual: ' + fmtEconFull(d.econ);
+  });
+
+  createChart('chart-index', [
+    {
+      type: 'scatter', mode: 'lines', name: 'Reclaimed Land',
+      x: YEARS, y: idx_land,
+      fill: 'tozeroy',
+      line: { color: '#16A34A', width: 2.5, shape: 'spline' },
+      fillcolor: 'rgba(22,163,74,0.12)',
+      hovertemplate: '%{hovertext}<extra></extra>',
+      hovertext: hover_land
+    },
+    {
+      type: 'scatter', mode: 'lines', name: 'Water Savings',
+      x: YEARS, y: idx_water,
+      fill: 'tozeroy',
+      line: { color: '#1D6FD8', width: 2.5, shape: 'spline' },
+      fillcolor: 'rgba(29,111,216,0.10)',
+      hovertemplate: '%{hovertext}<extra></extra>',
+      hovertext: hover_water
+    },
+    {
+      type: 'scatter', mode: 'lines', name: 'Economic Impact',
+      x: YEARS, y: idx_econ,
+      fill: 'tozeroy',
+      line: { color: '#D97706', width: 2.5, shape: 'spline' },
+      fillcolor: 'rgba(217,119,6,0.10)',
+      hovertemplate: '%{hovertext}<extra></extra>',
+      hovertext: hover_econ
+    }
+  ], {
+    yaxis: {
+      title: { text: 'Growth Multiple (Year 1 = 1×)', font: { size: 11 } },
+      type: 'log',
+      tickformat: '.0f'
+    },
+    xaxis: {
+      title: { text: 'Project Year', font: { size: 11 } },
+      dtick: 5
+    },
+    legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
+    margin: { l: 65, r: 30, t: 30, b: 80 }
+  });
+})();
+
+// ─────────────────────────────────────────────
+// CHART 2: LAND
+// ─────────────────────────────────────────────
+(function() {
+  const hovertext = DATA.map(function(d) {
+    var mult = (d.land / DATA[0].land).toFixed(0);
+    return '<b>Project Year ' + d.year + '</b><br>'
+         + '🌿 Reclaimed: <b>' + d.land.toLocaleString('en-US',{maximumFractionDigits:0}) + ' acres</b><br>'
+         + 'Growth: <b>' + mult + '× from Year 1</b>';
+  });
+
+  createChart('chart-land', [
+    {
+      type: 'scatter', mode: 'lines', name: 'Reclaimed Land (Acres)',
+      x: YEARS, y: LAND,
+      fill: 'tozeroy',
+      line: { color: '#16A34A', width: 3, shape: 'spline' },
+      fillcolor: 'rgba(22,163,74,0.15)',
+      hovertemplate: '%{hovertext}<extra></extra>',
+      hovertext: hovertext
+    }
+  ], {
+    yaxis: {
+      title: { text: 'Acres', font: { size: 11 } },
+      tickformat: ',.0f'
+    },
+    xaxis: {
+      title: { text: 'Project Year', font: { size: 11 } },
+      dtick: 5
+    },
+    legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
+    margin: { l: 75, r: 30, t: 30, b: 75 }
+  });
+})();
+
+// ─────────────────────────────────────────────
+// CHART 3: WATER
+// ─────────────────────────────────────────────
+(function() {
+  const hovertext = DATA.map(function(d) {
+    var mult = (d.water / DATA[0].water).toFixed(0);
+    return '<b>Project Year ' + d.year + '</b><br>'
+         + '💧 Water Saved: <b>' + d.water.toFixed(2) + ' MCM</b><br>'
+         + 'Growth: <b>' + mult + '× from Year 1</b>';
+  });
+
+  createChart('chart-water', [
+    {
+      type: 'scatter', mode: 'lines', name: 'Water Savings (MCM)',
+      x: YEARS, y: WATER,
+      fill: 'tozeroy',
+      line: { color: '#1D6FD8', width: 3, shape: 'spline' },
+      fillcolor: 'rgba(29,111,216,0.15)',
+      hovertemplate: '%{hovertext}<extra></extra>',
+      hovertext: hovertext
+    }
+  ], {
+    yaxis: {
+      title: { text: 'MCM', font: { size: 11 } },
+      tickformat: ',.1f'
+    },
+    xaxis: {
+      title: { text: 'Project Year', font: { size: 11 } },
+      dtick: 5
+    },
+    legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
+    margin: { l: 65, r: 30, t: 30, b: 75 }
+  });
+})();
+
+// ─────────────────────────────────────────────
+// CHART 4: ECONOMIC
+// ─────────────────────────────────────────────
+(function() {
+  const hovertext = DATA.map(function(d) {
+    var val = d.econ >= 1000
+      ? '$' + (d.econ/1000).toFixed(3) + 'B'
+      : '$' + d.econ.toFixed(2) + 'M';
+    var mult = (d.econ / DATA[0].econ).toFixed(0);
+    return '<b>Project Year ' + d.year + '</b><br>'
+         + '💰 Impact: <b>' + val + '</b><br>'
+         + 'Growth: <b>' + mult + '× from Year 1</b>';
+  });
+
+  createChart('chart-econ', [
+    {
+      type: 'scatter', mode: 'lines', name: 'Economic Impact (USD M)',
+      x: YEARS, y: ECON,
+      fill: 'tozeroy',
+      line: { color: '#D97706', width: 3, shape: 'spline' },
+      fillcolor: 'rgba(217,119,6,0.15)',
+      hovertemplate: '%{hovertext}<extra></extra>',
+      hovertext: hovertext
+    }
+  ], {
+    yaxis: {
+      title: { text: 'USD Millions', font: { size: 11 } },
+      tickformat: ',.0f'
+    },
+    xaxis: {
+      title: { text: 'Project Year', font: { size: 11 } },
+      dtick: 5
+    },
+    legend: { orientation: 'h', y: -0.15, x: 0.5, xanchor: 'center' },
+    margin: { l: 75, r: 30, t: 30, b: 75 }
+  });
+})();
+
+// ─────────────────────────────────────────────
+// MILESTONE TABLE (every 5 years)
+// ─────────────────────────────────────────────
+(function() {
+  var milestoneYears = [1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+  var labels = {
+    1:  'Project Launch',
+    5:  'Early Growth',
+    10: 'First Decade',
+    15: 'Mid-Decade',
+    20: 'Two Decades',
+    25: 'Quarter Century',
+    30: 'Three Decades',
+    35: '35-Year Mark',
+    40: 'Four Decades',
+    45: '45-Year Mark',
+    50: 'Full Horizon'
+  };
+  var badgeClass = {
+    1: 'badge-y10', 5: 'badge-y10',
+    10: 'badge-y10', 15: 'badge-y20',
+    20: 'badge-y20', 25: 'badge-y30',
+    30: 'badge-y30', 35: 'badge-y40',
+    40: 'badge-y40', 45: 'badge-y50',
+    50: 'badge-y50'
+  };
+
+  var base_land = DATA[0].land;
+  var base_econ = DATA[0].econ;
+
+  var tbody = document.getElementById('milestone-table-body');
+  milestoneYears.forEach(function(yr) {
+    var d = DATA[yr - 1];
+    var landMult = (d.land / base_land).toFixed(0);
+    var econMult = (d.econ / base_econ).toFixed(0);
+    var landStr = d.land.toLocaleString('en-US', {maximumFractionDigits: 0});
+    var waterStr = d.water.toFixed(2);
+    var econStr = d.econ >= 1000
+      ? '$' + (d.econ/1000).toFixed(3) + 'B'
+      : '$' + d.econ.toFixed(2) + 'M';
+
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><strong>Yr ' + yr + '</strong></td>' +
+      '<td><span class="badge-milestone ' + badgeClass[yr] + '">' + labels[yr] + '</span></td>' +
+      '<td class="num-green">' + landStr + '</td>' +
+      '<td class="num-blue">' + waterStr + '</td>' +
+      '<td class="num-gold">' + econStr + '</td>' +
+      '<td>' + landMult + '×</td>' +
+      '<td>' + econMult + '×</td>';
+    tbody.appendChild(tr);
+  });
+})();
+</script>
+</body>
+</html>
